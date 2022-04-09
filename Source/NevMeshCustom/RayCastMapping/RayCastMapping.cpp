@@ -48,6 +48,12 @@ void URayCastMapping::RegisterEvent()
 		mIsLaunchPointCalculated = true;
 		StartRayCast();
 	});
+
+	mOnRayCastFinish.AddLambda([this] (TArray<FHitResult> _results)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RayCast Finish"));
+	});
+	
 }
 
 /**
@@ -72,10 +78,8 @@ void URayCastMapping::CalculateLaunchLocation()
 	{
 		for (uint8 l = 0; l < _numberPerLine; l++)
 		{
-			//TODO Calculate launch location
 			const FVector _launchPoint = FVector(mLaunchPoint.X - mRadiusX + (_distanceLine * l),
 			                                     mLaunchPoint.Y - mRadiusY + (_distanceColone * c), mLaunchPoint.Z);
-			//TODO Add location found in mAllRayCastPosition
 			_rayCastLocations.Add(_launchPoint);
 		}
 	}
@@ -96,9 +100,7 @@ void URayCastMapping::LaunchRayCast()
 	{
 		TArray<FHitResult> _tmp = TArray<FHitResult>();
 		const FVector _location = mAllRayCastPosition[i];
-		//TODO Launch LineTrace from mAllRayCastPosition[index] location
 		mWorld->LineTraceMultiByChannel(_tmp, _location, _location - FVector(0, 0, mRadiusZ), mCollisionChannel);
-		//TODO Add FHitResult to mAllHitResults
 		_results += _tmp;
 	}
 	mAllHitResults = _results;
@@ -148,7 +150,6 @@ void URayCastMapping::DrawRayCastPosition() const
  */
 void URayCastMapping::StartRayCast()
 {
-	//TODO LaunchRayCast();
 	LaunchRayCast();
 }
 #pragma endregion

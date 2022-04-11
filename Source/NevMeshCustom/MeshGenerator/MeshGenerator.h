@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ProceduralMeshComponent.h"
+#include "MeshActor/MeshActor.h"
+#include "MeshActor/MyMeshInfo.h"
 #include "MeshGenerator.generated.h"
 
 
@@ -16,6 +17,7 @@ class NEVMESHCUSTOM_API UMeshGenerator : public UActorComponent
 #pragma region Event
 private:
 	DECLARE_EVENT(UMeshGenerator, FOnMeshInfoCreate)
+
 	DECLARE_EVENT(UMeshGenerator, FOnMeshCreate)
 
 	FOnMeshInfoCreate mOnMeshInfoCreate;
@@ -25,13 +27,14 @@ private:
 #pragma region F/P
 #pragma region Private
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Mesh", meta = (DisplayName = "Mesh"))
-	UProceduralMeshComponent* mMesh = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Mesh | Actor", meta = (DisplayName = "Mesh Actor"))
+	TSubclassOf<AMeshActor> mMeshActor = nullptr;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Mesh | Actor", meta = (DisplayName = "All Mesh Actor"))
+	TArray<AMeshActor*> mAllMeshActor = TArray<AMeshActor*>();
 
-	UPROPERTY(VisibleAnywhere, Category = "Mesh", meta = (DisplayName = "Vertices"))
-	TArray<FVector> mVertices = TArray<FVector>();
-	UPROPERTY(VisibleAnywhere, Category = "Mesh", meta = (DisplayName = "Triangles"))
-	TArray<int32> mTriangles = TArray<int32>();
+	UPROPERTY(VisibleAnywhere, Category = "Mesh | Info", meta = (DisplayName = "All mesh info"))
+	TArray<FMyMeshInfo> mMeshInfos = TArray<FMyMeshInfo>();
 #pragma endregion
 
 #pragma region Public
@@ -58,7 +61,7 @@ private:
 	* @brief Add all methode to corresponding event
 	*/
 	void RegisterEvent();
-	
+
 	/**
 	 * @brief Make an array the will contains all vertex given
 	 * @param _vertex1 Location of the first vertices
@@ -77,9 +80,15 @@ private:
 
 #pragma region Public
 public:
+	/**
+	* @brief Create a mesh
+	* @param _vertices 
+	* @param _triangles 
+	* @param _uvs 
+	*/
 	UFUNCTION()
 	void Init(const TArray<FHitResult>& _array, const uint8& _nbPerLine);
-	
+
 	/**
 	* @brief Create recursively the Mesh of the NavMesh
 	* @param _hitLocation Array that contains all location of the point touch by the RayCast/LineTrace
@@ -88,7 +97,7 @@ public:
 	*/
 	UFUNCTION()
 	void CreateMesh(const TArray<FVector> _hitLocation, const uint8 _index, const uint8 _nbPerLine);
-	
+
 	/**
 	* @brief Make an array the will contains the UV
 	* @param _uvX X value of the UV

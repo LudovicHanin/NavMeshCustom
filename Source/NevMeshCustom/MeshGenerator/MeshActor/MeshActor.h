@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "MeshActor.generated.h"
 
+struct FMyMeshInfo;
 UCLASS()
 class NEVMESHCUSTOM_API AMeshActor : public AActor
 {
@@ -46,6 +47,7 @@ private:
 	#pragma region Public
 public:
 	void InitMesh(const TArray<FVector>& _vertices, const TArray<int32>& _triangles, const TArray<FVector2d> _uvs);
+	void InitMesh(const FMyMeshInfo& _meshInfo);
 	#pragma endregion
 	#pragma endregion
 };

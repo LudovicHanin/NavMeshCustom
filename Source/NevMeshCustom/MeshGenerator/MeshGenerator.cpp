@@ -1,5 +1,7 @@
 #include "MeshGenerator.h"
 
+
+
 #pragma region UnrealMethods
 UMeshGenerator::UMeshGenerator()
 {
@@ -41,15 +43,29 @@ void UMeshGenerator::RegisterEvent()
 void UMeshGenerator::CreateTriangle(const FVector& _vertex1, const FVector& _vertex2,
                                     const FVector& _vertex3)
 {
-	const uint8 _index = mVertices.Num();
 	const FVector _offset = FVector(0, 0, 50.0f);
-	mVertices.Add(_vertex1 + _offset);
-	mVertices.Add(_vertex2 + _offset);
-	mVertices.Add(_vertex3 + _offset);
+	
+	TArray<FVector> _vertices = TArray<FVector>();
+	_vertices.Add(_vertex1 + _offset);
+	_vertices.Add(_vertex2 + _offset);
+	_vertices.Add(_vertex3 + _offset);
 
-	mTriangles.Add(_index);
-	mTriangles.Add(_index + 1);
-	mTriangles.Add(_index + 2);
+	TArray<int32> _triangles = TArray<int32>();
+	_triangles.Add(0);
+	_triangles.Add(1);
+	_triangles.Add(2);
+
+	const FMyMeshInfo _meshInfo = FMyMeshInfo(_vertices, _triangles);
+	mMeshInfos.Add(_meshInfo);
+	
+	// const uint8 _index = mVertices.Num();
+	// mVertices.Add(_vertex1 + _offset);
+	// mVertices.Add(_vertex2 + _offset);
+	// mVertices.Add(_vertex3 + _offset);
+	//
+	// mTriangles.Add(_index);
+	// mTriangles.Add(_index + 1);
+	// mTriangles.Add(_index + 2);
 }
 
 /**
@@ -57,12 +73,42 @@ void UMeshGenerator::CreateTriangle(const FVector& _vertex1, const FVector& _ver
  */
 void UMeshGenerator::DisplayMesh()
 {
-	TArray<FVector2d> _uvs = TArray<FVector2d>();
+	mAllMeshActor.Empty();
+	
+	UWorld* _world = GetWorld();
+	if(!_world)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => No world"));
+		return;
+	}
 
-	mMesh->CreateMeshSection_LinearColor(0, mVertices, mTriangles, TArray<FVector>(), _uvs, TArray<FLinearColor>(),
-	                                     TArray<FProcMeshTangent>(), true);
+	if(!mMeshActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => No ref MeshActor"));
+		return;
+	}
+	
+	for(uint8 i = 0; i < mMeshInfos.Num(); i++)
+	{
+		AMeshActor* _meshActor = _world->SpawnActor<AMeshActor>(mMeshActor, mMeshInfos[i].GetVertices()[0], FRotator::ZeroRotator);
+		if(!_meshActor)
+		{
+			UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => Can't create MeshActor"));
+			return;
+		}
+		_meshActor->InitMesh(mMeshInfos[i]);
+		mAllMeshActor.Add(_meshActor);
+	}
+
+	// mMesh->CreateMeshSection_LinearColor(0, mVertices, mTriangles, TArray<FVector>(), _uvs, TArray<FLinearColor>(),
+	//                                      TArray<FProcMeshTangent>(), true);
 }
 
+/**
+ * @brief Create an Array of FVector from an Array of FHitResult and Call CreateMesh methods
+ * @param _array Array of the Result of the RayCast
+ * @param _nbPerLine Number of RayCast per line
+ */
 void UMeshGenerator::Init(const TArray<FHitResult>& _array, const uint8& _nbPerLine)
 {
 	TArray<FVector> _loc = TArray<FVector>();

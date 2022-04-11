@@ -1,13 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MeshInfo.generated.h"
-
+#include "MyMeshInfo.generated.h"
 
 USTRUCT()
-struct FMeshInfo
+struct FMyMeshInfo
 {
 	GENERATED_BODY()
 
@@ -24,7 +21,7 @@ public:
 	/**
 	 * @brief Default constructor
 	 */
-	FMeshInfo()
+	FMyMeshInfo()
 	{
 		mVertices = TArray<FVector>();
 		mTriangles = TArray<int32>();
@@ -37,7 +34,7 @@ public:
 	 * @param _triangles 
 	 * @param _uvs 
 	 */
-	FMeshInfo(const TArray<FVector>& _vertices, const TArray<int32>& _triangles, const TArray<FVector2D>& _uvs)
+	FMyMeshInfo(const TArray<FVector>& _vertices, const TArray<int32>& _triangles, const TArray<FVector2D>& _uvs = TArray<FVector2D>())
 	{
 		mVertices = _vertices;
 		mTriangles = _triangles;
@@ -48,8 +45,11 @@ public:
 	 * @brief Constructor by copy
 	 * @param _meshInfo Copy of MeshInfo
 	 */
-	FMeshInfo(const FMeshInfo& _meshInfo)
+	FMyMeshInfo(const FMyMeshInfo& _meshInfo)
 	{
+		mVertices = _meshInfo.GetVertices();
+		mTriangles = _meshInfo.GetTriangles();
+		mUVS = _meshInfo.GetUVS();
 	}
 #pragma endregion
 
@@ -57,5 +57,11 @@ public:
 	FORCEINLINE TArray<FVector> GetVertices() const { return mVertices; }
 	FORCEINLINE TArray<int32> GetTriangles() const { return mTriangles; }
 	FORCEINLINE TArray<FVector2D> GetUVS() const { return mUVS; }
+#pragma endregion
+
+#pragma region Setter
+	FORCEINLINE void SetVertices(const TArray<FVector>& _vertices) { mVertices = _vertices; }
+	FORCEINLINE void SetTriangles(const TArray<int32>& _triangles) { mTriangles = _triangles; }
+	FORCEINLINE void SetUVS(const TArray<FVector2D>& _uvs) { mUVS = _uvs; }
 #pragma endregion
 };

@@ -4,8 +4,6 @@
 UMeshGenerator::UMeshGenerator()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	mMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("NavMesh"));
 }
 
 void UMeshGenerator::BeginPlay()

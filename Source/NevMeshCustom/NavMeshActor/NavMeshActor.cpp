@@ -42,11 +42,6 @@ void ANavMeshActor::StartRayCast()
 		UE_LOG(LogTemp, Warning, TEXT("ANavMeshActor::StartRayCast => Event Call"));
 
 		_meshG->Init(_array, mRayCastMapping->GetNumberPerLine());
-		// TArray<FVector> _loc = TArray<FVector>();
-		// for(uint8 i = 0; i < _array.Num(); i++)
-		// 	_loc.Add(_array[i].Location);
-		// _meshG->CreateMesh(_loc, 0, mRayCastMapping->GetNumberPerLine());
-		
 	});
 	
 	mRayCastMapping->StartRayCast();

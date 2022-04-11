@@ -46,13 +46,13 @@ void URayCastMapping::RegisterEvent()
 	mOnLaunchPointCalculate.AddLambda([this](TArray<FVector> _locs)
 	{
 		mIsLaunchPointCalculated = true;
-		StartRayCast();
+		// StartRayCast();
 	});
 
-	mOnRayCastFinish.AddLambda([this] (TArray<FHitResult> _results)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("RayCast Finish"));
-	});
+	// mOnRayCastFinish.BindLambda([this] (TArray<FHitResult> _results)
+	// {
+	// 	//UE_LOG(LogTemp, Warning, TEXT("RayCast Finish"));
+	// });
 	
 }
 
@@ -68,15 +68,15 @@ void URayCastMapping::CalculateLaunchLocation()
 		mNumberOfRayCast -= mNumberOfRayCast % 100;
 		UE_LOG(LogTemp, Warning, TEXT("Number of raycast : %d"), mNumberOfRayCast);
 	}
-	const int _numberPerLine = mNumberOfRayCast / 10;
-	const float _distanceLine = (((mLaunchPoint.X + mRadiusX) - mLaunchPoint.X) * 2) / (_numberPerLine - 1);
-	const float _distanceColone = (((mLaunchPoint.Y + mRadiusY) - mLaunchPoint.Y) * 2) / (_numberPerLine - 1);
+	mNumberPerLine = mNumberOfRayCast / 10;
+	const float _distanceLine = (((mLaunchPoint.X + mRadiusX) - mLaunchPoint.X) * 2) / (mNumberPerLine - 1);
+	const float _distanceColone = (((mLaunchPoint.Y + mRadiusY) - mLaunchPoint.Y) * 2) / (mNumberPerLine - 1);
 
 	TArray<FVector> _rayCastLocations = TArray<FVector>();
 
-	for (uint8 c = 0; c < _numberPerLine; c++)
+	for (uint8 c = 0; c < mNumberPerLine; c++)
 	{
-		for (uint8 l = 0; l < _numberPerLine; l++)
+		for (uint8 l = 0; l < mNumberPerLine; l++)
 		{
 			const FVector _launchPoint = FVector(mLaunchPoint.X - mRadiusX + (_distanceLine * l),
 			                                     mLaunchPoint.Y - mRadiusY + (_distanceColone * c), mLaunchPoint.Z);
@@ -104,7 +104,8 @@ void URayCastMapping::LaunchRayCast()
 		_results += _tmp;
 	}
 	mAllHitResults = _results;
-	mOnRayCastFinish.Broadcast(_results);
+	UE_LOG(LogTemp, Warning, TEXT("URayCastMapping::LaunchRayCast => Call mOnRayCastFinish"));
+	bool _value = mOnRayCastFinish.ExecuteIfBound(_results);
 }
 
 #pragma region Debug

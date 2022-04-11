@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NevMeshCustom/MeshGenerator/MeshGenerator.h"
 #include "NevMeshCustom/RayCastMapping/RayCastMapping.h"
 #include "NavMeshActor.generated.h"
 
@@ -30,6 +31,9 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Component | RayCast Mapping", meta = (DisplayName = "RayCast Mapping"))
 	URayCastMapping* mRayCastMapping = nullptr;
+
+	UPROPERTY(VisibleAnywhere, Category = "Component | Mesh | Generate", meta =	(DisplayName = "Mesh Generator"))
+	UMeshGenerator* mMeshGenerator = nullptr;
 #pragma endregion
 
 #pragma region Public
@@ -46,15 +50,10 @@ protected:
 
 #pragma region CustomMethods
 #pragma region Private
-private:
 #pragma endregion
 
 #pragma region Public
-public:
-	UFUNCTION(Exec)
-	void StartRayCast();
-	
-	bool IsValid() const;
-#pragma endregion
+void StartRayCast();
+#pragma endregion 
 #pragma endregion
 };

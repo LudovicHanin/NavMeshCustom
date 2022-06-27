@@ -9,11 +9,11 @@ struct FMyMeshInfo
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, meta = (DisplayName = "Vertices"))
 	TArray<FVector> mVertices = TArray<FVector>();
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, meta = (DisplayName = "Triangles"))
 	TArray<int32> mTriangles = TArray<int32>();
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, meta = (DisplayName = "UV"))
 	TArray<FVector2D> mUVS = TArray<FVector2D>();
 
 public:

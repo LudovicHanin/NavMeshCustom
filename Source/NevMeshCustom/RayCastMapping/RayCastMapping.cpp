@@ -1,6 +1,7 @@
 #include "RayCastMapping.h"
 #include "DrawDebugHelpers.h"
 #include "NevMeshCustom/NevMeshCustomCharacter.h"
+#include "NevMeshCustom/Utils/Debug/Debug.h"
 
 #pragma region UnrealMethods
 URayCastMapping::URayCastMapping()
@@ -68,15 +69,15 @@ void URayCastMapping::CalculateLaunchLocation()
 		mNumberOfRayCast -= mNumberOfRayCast % 100;
 		UE_LOG(LogTemp, Warning, TEXT("Number of raycast : %d"), mNumberOfRayCast);
 	}
-	mNumberPerLine = mNumberOfRayCast / 10;
+	mNumberPerLine = (int)FMath::Sqrt<float>(mNumberOfRayCast);
 	const float _distanceLine = (((mLaunchPoint.X + mRadiusX) - mLaunchPoint.X) * 2) / (mNumberPerLine - 1);
 	const float _distanceColone = (((mLaunchPoint.Y + mRadiusY) - mLaunchPoint.Y) * 2) / (mNumberPerLine - 1);
 
 	TArray<FVector> _rayCastLocations = TArray<FVector>();
 
-	for (uint8 c = 0; c < mNumberPerLine; c++)
+	for (size_t c = 0; c < mNumberPerLine; c++)
 	{
-		for (uint8 l = 0; l < mNumberPerLine; l++)
+		for (size_t l = 0; l < mNumberPerLine; l++)
 		{
 			const FVector _launchPoint = FVector(mLaunchPoint.X - mRadiusX + (_distanceLine * l),
 			                                     mLaunchPoint.Y - mRadiusY + (_distanceColone * c), mLaunchPoint.Z);
@@ -96,8 +97,9 @@ void URayCastMapping::LaunchRayCast()
 	if (!mIsLaunchPointCalculated) return;
 	mOnLaunchRayCast.Broadcast();
 	TArray<FHitResult> _results = TArray<FHitResult>();
-	for (uint8 i = 0; i < mAllRayCastPosition.Num(); i++)
+	for (size_t i = 0; i < mAllRayCastPosition.Num(); i++)
 	{
+		UDebug::LogWarning(FString::FromInt(i));
 		TArray<FHitResult> _tmp = TArray<FHitResult>();
 		const FVector _location = mAllRayCastPosition[i];
 		mWorld->LineTraceMultiByChannel(_tmp, _location, _location - FVector(0, 0, mRadiusZ), mCollisionChannel);
@@ -134,7 +136,7 @@ void URayCastMapping::DrawRadiusDebug() const
 void URayCastMapping::DrawRayCastPosition() const
 {
 	if (!mWorld)return;
-	for (uint8 i = 0; i < mAllRayCastPosition.Num(); i++)
+	for (size_t i = 0; i < mAllRayCastPosition.Num(); i++)
 	{
 		const FVector _location = mAllRayCastPosition[i];
 		DrawDebugSphere(mWorld, _location, 5.0f, 32, FColor::Red);

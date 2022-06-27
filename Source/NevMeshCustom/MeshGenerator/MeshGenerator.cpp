@@ -1,5 +1,6 @@
 #include "MeshGenerator.h"
 
+#include "NevMeshCustom/Utils/Debug/Debug.h"
 
 
 #pragma region UnrealMethods
@@ -11,6 +12,7 @@ UMeshGenerator::UMeshGenerator()
 void UMeshGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	RegisterEvent();
 }
 
 void UMeshGenerator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -44,7 +46,7 @@ void UMeshGenerator::CreateTriangle(const FVector& _vertex1, const FVector& _ver
                                     const FVector& _vertex3)
 {
 	const FVector _offset = FVector(0, 0, 50.0f);
-	
+
 	TArray<FVector> _vertices = TArray<FVector>();
 	_vertices.Add(_vertex1 + _offset);
 	_vertices.Add(_vertex2 + _offset);
@@ -57,15 +59,6 @@ void UMeshGenerator::CreateTriangle(const FVector& _vertex1, const FVector& _ver
 
 	const FMyMeshInfo _meshInfo = FMyMeshInfo(_vertices, _triangles);
 	mMeshInfos.Add(_meshInfo);
-	
-	// const uint8 _index = mVertices.Num();
-	// mVertices.Add(_vertex1 + _offset);
-	// mVertices.Add(_vertex2 + _offset);
-	// mVertices.Add(_vertex3 + _offset);
-	//
-	// mTriangles.Add(_index);
-	// mTriangles.Add(_index + 1);
-	// mTriangles.Add(_index + 2);
 }
 
 /**
@@ -74,26 +67,28 @@ void UMeshGenerator::CreateTriangle(const FVector& _vertex1, const FVector& _ver
 void UMeshGenerator::DisplayMesh()
 {
 	mAllMeshActor.Empty();
-	
+	UDebug::LogWarning("Enter");
 	UWorld* _world = GetWorld();
-	if(!_world)
+	if (!_world)
 	{
 		UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => No world"));
 		return;
 	}
 
-	if(!mMeshActor)
+	if (!mMeshActor)
 	{
 		UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => No ref MeshActor"));
 		return;
 	}
-	
-	for(uint8 i = 0; i < mMeshInfos.Num(); i++)
+	UDebug::Log(FString("Number of Mesh info " + FString::FromInt(mMeshInfos.Num())));
+	for (size_t i = 0; i < mMeshInfos.Num(); i++)
 	{
-		AMeshActor* _meshActor = _world->SpawnActor<AMeshActor>(mMeshActor, mMeshInfos[i].GetVertices()[0], FRotator::ZeroRotator);
-		if(!_meshActor)
+		UDebug::Log(FString("Spawn"));
+		AMeshActor* _meshActor = _world->SpawnActor<AMeshActor>(mMeshActor, mMeshInfos[i].GetVertices()[0],
+		                                                        FRotator::ZeroRotator);
+		if (!_meshActor)
 		{
-			UE_LOG(LogTemp, Error, TEXT("UMeshGenerator::DisplayMesh => Can't create MeshActor"));
+			UDebug::LogError("UMeshGenerator::DisplayMesh => Can't create MeshActor");
 			return;
 		}
 		_meshActor->InitMesh(mMeshInfos[i]);
@@ -109,12 +104,12 @@ void UMeshGenerator::DisplayMesh()
  * @param _array Array of the Result of the RayCast
  * @param _nbPerLine Number of RayCast per line
  */
-void UMeshGenerator::Init(const TArray<FHitResult>& _array, const uint8& _nbPerLine)
+void UMeshGenerator::Init(const TArray<FHitResult>& _array, const int& _nbPerLine)
 {
 	TArray<FVector> _loc = TArray<FVector>();
-	for(uint8 i = 0; i < _array.Num(); i++)
+	for (size_t i = 0; i < _array.Num(); i++)
 		_loc.Add(_array[i].Location);
-	
+
 	CreateMesh(_loc, 0, _nbPerLine);
 }
 
@@ -124,27 +119,35 @@ void UMeshGenerator::Init(const TArray<FHitResult>& _array, const uint8& _nbPerL
  * @param _index Current Index in the Array HitLocation
  * @param _nbPerLine Number of point per line
  */
-void UMeshGenerator::CreateMesh(const TArray<FVector> _hitLocation, const uint8 _index, const uint8 _nbPerLine)
+void UMeshGenerator::CreateMesh(const TArray<FVector> _hitLocation, const int _index, const int _nbPerLine)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UMeshGenerator::CreateMesh => Enter"));
+	UDebug::LogError(FString::FromInt(_index));
+
 	if (!_hitLocation.IsValidIndex(_index + 1))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UMeshGenerator::CreateMesh => Enter"));
 		mOnMeshInfoCreate.Broadcast();
 		return;
 	}
 
 
-	if (_index % (_nbPerLine - 1) == 0) CreateMesh(_hitLocation, _index + 1, _nbPerLine);
+	if (_index % (_nbPerLine - 1) == 0)
+	{
+		CreateMesh(_hitLocation, _index + 1, _nbPerLine);
+		return;
+	}
 
 	//Create Top Left Triangle
-	CreateTriangle(_hitLocation[_index], _hitLocation[_index + 1], _hitLocation[_index + _nbPerLine]);
-
-	if (!_hitLocation.IsValidIndex(_index + _nbPerLine + 1)) return;
+	if (_hitLocation.IsValidIndex(_index + _nbPerLine))
+		CreateTriangle(_hitLocation[_index], _hitLocation[_index + 1],
+		               _hitLocation[_index + _nbPerLine]);
 
 	//Create Bottom Right Triangle
-	CreateTriangle(_hitLocation[_index + _nbPerLine + 1], _hitLocation[_index + _nbPerLine], _hitLocation[_index + 1]);
+	if (_hitLocation.IsValidIndex(_index + _nbPerLine + 1))
+		CreateTriangle(_hitLocation[_index + _nbPerLine + 1], _hitLocation[_index + _nbPerLine],
+		               _hitLocation[_index + 1]);
 
-	CreateMesh(_hitLocation, _index + 1, _nbPerLine);
+	return CreateMesh(_hitLocation, _index + 1, _nbPerLine);
 }
 
 /**

@@ -87,7 +87,7 @@ public:
 	* @param _uvs 
 	*/
 	UFUNCTION()
-	void Init(const TArray<FHitResult>& _array, const uint8& _nbPerLine);
+	void Init(const TArray<FHitResult>& _array, const int& _nbPerLine);
 
 	/**
 	* @brief Create recursively the Mesh of the NavMesh
@@ -96,7 +96,7 @@ public:
 	* @param _nbPerLine Number of point per line
 	*/
 	UFUNCTION()
-	void CreateMesh(const TArray<FVector> _hitLocation, const uint8 _index, const uint8 _nbPerLine);
+	void CreateMesh(const TArray<FVector> _hitLocation, const int _index, const int _nbPerLine);
 
 	/**
 	* @brief Make an array the will contains the UV
